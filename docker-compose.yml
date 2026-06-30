@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://mestrelo:mestrelo@db:5432/mestrelo
+      JWT_SECRET: ${JWT_SECRET:-troque-em-producao}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      CRON_SECRET: ${CRON_SECRET:-cron-secret}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      # Opcionais — deixar vazio para usar fallbacks de dev
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+      TWILIO_PHONE_NUMBER: ${TWILIO_PHONE_NUMBER:-}
+      EVOLUTION_API_URL: ${EVOLUTION_API_URL:-}
+      EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+    volumes:
+      - uploads:/app/uploads
+      - db_fallback:/app/db_fallback.json
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mestrelo
+      POSTGRES_USER: mestrelo
+      POSTGRES_PASSWORD: mestrelo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mestrelo']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uploads:
+  db_fallback:

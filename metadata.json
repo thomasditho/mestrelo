@@ -1,0 +1,8 @@
+{
+  "name": "Mestrelo",
+  "description": "Aplicativo para gestão de serviços, orçamentos, clientes e finanças para prestadores de serviço autônomos com inteligência artificial integrada.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
