@@ -1,4 +1,5 @@
 import express from 'express';
+// Deploy Railway - Versao 1.0.1
 import path from 'path';
 import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
