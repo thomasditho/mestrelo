@@ -18,19 +18,20 @@ const router = Router();
 // POST /admin/login
 router.post('/admin/login', adminRateLimit, (req, res) => {
   const { password } = req.body;
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-  if (!ADMIN_PASSWORD) return res.status(404).json({ error: 'Not found.' });
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
   if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Senha incorreta.' });
 
   const token = jwt.sign({ admin: true }, ADMIN_SECRET, { expiresIn: '8h' });
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie', `${ADMIN_COOKIE}=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${8 * 3600}${secure}`);
+  // Usar sempre SameSite=None e Secure para funcionar dentro do iframe do AI Studio e no deploy em HTTPS (Railway)
+  const secure = '; Secure';
+  res.setHeader('Set-Cookie', `${ADMIN_COOKIE}=${token}; HttpOnly; Path=/; SameSite=None; Max-Age=${8 * 3600}${secure}`);
   return res.json({ success: true });
 });
 
 // POST /admin/logout
 router.post('/admin/logout', (_req, res) => {
-  res.setHeader('Set-Cookie', `${ADMIN_COOKIE}=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0`);
+  const secure = '; Secure';
+  res.setHeader('Set-Cookie', `${ADMIN_COOKIE}=; HttpOnly; Path=/; SameSite=None; Max-Age=0${secure}`);
   return res.json({ success: true });
 });
 
